@@ -1,4 +1,3 @@
-dist: xenial
 language: c
 sudo: required
 addons:
@@ -18,6 +17,14 @@ addons:
       - libxpm-dev
       - libzip-dev
       - libsqlite3-dev
+  homebrew:
+    packages:
+      - ccache
+      - mysql
+      - bison
+      - re2c
+      - openssl
+      - gmp
 
 
 services:
@@ -25,28 +32,49 @@ services:
   - postgresql
 
 cache:
-    apt: true
-    ccache: true
+  apt: true
+  ccache: true
+  directories:
+    - $HOME/Library/Caches/Homebrew
 
 env:
-    global:
-      - MYSQL_TEST_HOST=127.0.0.1
-      - MYSQL_TEST_USER=travis
-      - PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
-      - PDO_MYSQL_TEST_USER=travis
-      - PDO_MYSQL_TEST_PASS=
-      - PDO_MYSQL_TEST_HOST=127.0.0.1
-      - REPORT_EXIT_STATUS=1
-    matrix:
-      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
-      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+  global:
+    - MYSQL_TEST_HOST=127.0.0.1
+    - MYSQL_TEST_USER=travis
+    - PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
+    - PDO_MYSQL_TEST_USER=travis
+    - PDO_MYSQL_TEST_PASS=
+    - PDO_MYSQL_TEST_HOST=127.0.0.1
+    - REPORT_EXIT_STATUS=1
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      env:
+        - ENABLE_MAINTAINER_ZTS=0
+        - ENABLE_DEBUG=0
+    - os: linux
+      dist: xenial
+      env:
+        - ENABLE_MAINTAINER_ZTS=1
+        - ENABLE_DEBUG=1
+    - os: osx
+      osx_image: xcode10.1
+      env:
+        - ENABLE_MAINTAINER_ZTS=0
+        - ENABLE_DEBUG=0
 
 before_script:
     - ccache --version
     - ccache --zero-stats
     - export USE_CCACHE=1
-    # Enable IPv6
-    - sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
+    - |
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        . ./travis/setup_linux.sh
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        . ./travis/setup_osx.sh
+      fi
     # Compile PHP
     - ./travis/compile.sh
     # Setup Extensions
