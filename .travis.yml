@@ -1,9 +1,34 @@
 git:
   quiet: true
 
-dist: xenial
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0 ENABLE_OPCACHE=1
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0 ENABLE_OPCACHE=0
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env: ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1 ENABLE_OPCACHE=0
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env: ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0 ENABLE_OPCACHE=1
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env: ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1 ENABLE_OPCACHE=0
+  allow_failures:
+    - os: osx
+
 language: c
 sudo: required
+
 addons:
   apt:
     packages:
@@ -23,6 +48,23 @@ addons:
       - libsqlite3-dev
       - libwebp-dev
       - libonig-dev
+  homebrew:
+    packages:
+      - ccache
+      - bison
+      - re2c
+      - openssl
+      - mysql
+      - postgresql
+      - enchant
+      - freetype
+      - gettext
+      - intltool
+      - icu4c
+      - libedit
+      - zlib
+      - t1lib
+      - gd
 
 
 services:
@@ -41,28 +83,25 @@ notifications:
       on_failure: always
 
 cache:
-    apt: true
     ccache: true
 
 env:
     global:
       - MYSQL_TEST_HOST=127.0.0.1
-      - MYSQL_TEST_USER=travis
+      - MYSQL_TEST_USER=root
       - PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
-      - PDO_MYSQL_TEST_USER=travis
+      - PDO_MYSQL_TEST_USER=root
       - PDO_MYSQL_TEST_PASS=
       - PDO_MYSQL_TEST_HOST=127.0.0.1
       - REPORT_EXIT_STATUS=1
-    matrix:
-      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
-      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
 before_script:
+    # Setup OS
+    - . ./travis/os/$TRAVIS_OS_NAME.sh
+    # Setup ccache
     - ccache --version
     - ccache --zero-stats
     - export USE_CCACHE=1
-    # Enable IPv6
-    - sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
     # Compile PHP
     - ./travis/compile.sh
     # Setup Extensions
