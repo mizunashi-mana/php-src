@@ -65,12 +65,15 @@ addons:
       - zlib
       - t1lib
       - gd
+      - oniguruma
+      - libzip
 
 services:
   - mysql
   - postgresql
 
 cache:
+    apt: true
     ccache: true
 
 env:

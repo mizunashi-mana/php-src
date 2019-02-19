@@ -58,7 +58,7 @@ $TS \
 --with-pdo-sqlite \
 $ENABLE_INTL \
 --without-pear \
---with-gd \
+--enable-gd \
 --with-jpeg \
 --with-webp \
 --with-freetype \

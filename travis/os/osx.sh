@@ -1,6 +1,7 @@
 # Set expected paths
-export PATH="/usr/local/opt/bison/bin:/usr/local/opt/ccache/libexec:$PATH"
-export PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/libedit/lib/pkgconfig:/usr/local/opt/zlib/lib/pkgconfig:$PKG_CONFIG_PATH"
+export YACC="$(brew --prefix bison)/bin/bison"
+export PATH="$(brew --prefix ccache)/libexec:$PATH"
+export PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig:$(brew --prefix libedit)/lib/pkgconfig:$(brew --prefix zlib)/lib/pkgconfig:/usr/X11/lib/pkgconfig:$PKG_CONFIG_PATH"
 export CFLAGS="-Wno-nullability-completeness -Wno-expansion-to-defined $CFLAGS"
 export CXXFLAGS="-Wno-nullability-completeness -Wno-expansion-to-defined $CXXFLAGS"
 # Force relinking
